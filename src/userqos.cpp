@@ -23,20 +23,25 @@ int main(int argc, char** args){
   assert( NULL == participant );
   assert( NULL != participant._retn() );
 
-  // Uh, don't need to register a builtin class.
-  // StringSeqSupport_var stringseq_support = new StringSeqSupport();
-  // retval = participant->register_type(stringseq_support->get_type_name());
-  // assert( DDS::RETCODE_OK == retval );
+  /**
+    Magical key definitions. If you want the idlpp to generate TypeSupport you MUST,
+    I repeat, MUST, add #pragma. Why would you ever NOT want the TypeSupport? Who knows.
+    OpenSplice_PreProcessor_usermanual.pdf , Section: 1.5.1 KeyDefinitions
+  **/
+  PID::PresenceTypeSupport_ptr pid_ts = new PID::PresenceTypeSupport();
+  assert( NULL != pid_ts );
+  retval = pid_ts->register_type(participant, pid_ts->get_type_name());
+  assert ( DDS::RETCODE_OK == retval );
 
   DDS::TopicQos_var topic_qos;
   retval = participant->get_default_topic_qos(topic_qos);
   assert( DDS::RETCODE_OK == retval );
-  PIDTypeSupport_var pid_ts = new PIDTypeSuport();
-/*  DDS::Topic_var string_topic = participant->create_topic("system_times",
-                                                          StringSeq::get_type_name(),
-                                                          topic_qos,
-                                                          NULL,
-                                                          DDS::STATUS_MASK_NONE); */
+
+  DDS::Topic_var presence_topic = participant->create_topic("presence",
+                                                            pid_ts->get_type_name(),
+                                                            topic_qos,
+                                                            NULL,
+                                                            DDS::STATUS_MASK_NONE); 
 
   DDS::PublisherQos publisher_qos;
   retval = participant->get_default_publisher_qos(publisher_qos);
