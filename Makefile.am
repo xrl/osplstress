@@ -1,3 +1,5 @@
+AM_CFLAGS = -g -O0
+
 bin_PROGRAMS = userqot
 
 # /home/ospl/HDE/x86_64.linux2.6/include/sys/
