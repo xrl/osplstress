@@ -1,4 +1,5 @@
-AM_CFLAGS = -g -O0
+# -pedantic
+AM_CXXFLAGS = -g -O0 -Wall -Werror
 
 bin_PROGRAMS = userqot
 
