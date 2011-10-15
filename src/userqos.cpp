@@ -5,6 +5,9 @@
 
 #include <idl/ccpp_PID.h>
 
+#include "userqos/reader.h"
+#include "userqos/writer.h"
+
 /**
   _var : CORBA smart pointer. It assumes control of the memory
   _ptr : You do all the work
@@ -91,7 +94,10 @@ int main(int argc, char** args){
   assert( NULL == reader._retn() );
   PID::PresenceDataReader_var presence_reader = PID::PresenceDataReader::_narrow(reader);
   assert( NULL == presence_reader._retn() );
-  
+
+
+  retval = dpf->delete_contained_entities();
+  assert( DDS::RETCODE_OK == retval );
   retval = dpf->delete_participant(participant);
   assert( DDS::RETCODE_OK == retval );
   return 0;
