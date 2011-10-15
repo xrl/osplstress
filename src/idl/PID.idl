@@ -1,0 +1,5 @@
+struct PID {
+  string hostname;
+  long pid;
+};
+
