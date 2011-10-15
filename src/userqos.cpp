@@ -3,6 +3,8 @@
 
 #include <ccpp_dds_dcps.h>
 
+#include <idl/ccpp_PID.h>
+
 /**
   _var : CORBA smart pointer. It assumes control of the memory
   _ptr : You do all the work
@@ -26,15 +28,16 @@ int main(int argc, char** args){
   // retval = participant->register_type(stringseq_support->get_type_name());
   // assert( DDS::RETCODE_OK == retval );
 
-/*(  DDS::TopicQos_var topic_qos;
+  DDS::TopicQos_var topic_qos;
   retval = participant->get_default_topic_qos(topic_qos);
   assert( DDS::RETCODE_OK == retval );
-  DDS::Topic_var string_topic = participant->create_topic("system_times",
+  PIDTypeSupport_var pid_ts = new PIDTypeSuport();
+/*  DDS::Topic_var string_topic = participant->create_topic("system_times",
                                                           StringSeq::get_type_name(),
                                                           topic_qos,
                                                           NULL,
-                                                          DDS::STATUS_MASK_NONE);
-*/
+                                                          DDS::STATUS_MASK_NONE); */
+
   DDS::PublisherQos publisher_qos;
   retval = participant->get_default_publisher_qos(publisher_qos);
   assert( DDS::RETCODE_OK == retval );
