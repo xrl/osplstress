@@ -64,7 +64,33 @@ int main(int argc, char** args){
   const char* msg = "HI THERE COWBOY\n";
   dw_qos.user_data.value = DDS_DCPSUFLSeq<unsigned char, DDS::octSeq_uniq_>(msg);
   assert( strlen(msg) == dw_qos.user_data.value.length() );
-  publisher->create_datawriter(presence_topic, dw_qos, NULL, DDS::STATUS_MASK_NONE); 
+  
+  DDS::DataWriter_var writer = publisher->create_datawriter(presence_topic, dw_qos, NULL, DDS::STATUS_MASK_NONE); 
+  assert( NULL != writer._retn() );
+  PID::PresenceDataWriter_var presence_writer = PID::PresenceDataWriter::_narrow(writer);
+  assert( NULL != presence_writer._retn() );
+
+  /**
+    Subscriber
+  **/
+  DDS::SubscriberQos subscriber_qos;
+  retval = participant->get_default_subscriber_qos(subscriber_qos);
+  assert( DDS::RETCODE_OK == retval );
+  DDS::Subscriber_var subscriber = participant->create_subscriber(subscriber_qos,
+                                                                  NULL,
+                                                                  DDS::STATUS_MASK_NONE);
+  assert( NULL != subscriber._retn() );
+
+  /**
+    PID Data Reader
+  **/
+  DDS::DataReaderQos dr_qos;
+  retval = subscriber->get_default_datareader_qos(dr_qos);
+  assert( DDS::RETCODE_OK == retval );
+  DDS::DataReader_var reader = subscriber->create_datareader(presence_topic, dr_qos, NULL, DDS::STATUS_MASK_NONE);
+  assert( NULL == reader._retn() );
+  PID::PresenceDataReader_var presence_reader = PID::PresenceDataReader::_narrow(reader);
+  assert( NULL == presence_reader._retn() );
   
   retval = dpf->delete_participant(participant);
   assert( DDS::RETCODE_OK == retval );
