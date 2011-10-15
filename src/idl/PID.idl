@@ -1,5 +1,8 @@
-struct PID {
-  string hostname;
-  long pid;
-};
 
+module PID{
+    struct Presence {
+      string hostname;
+      long pid;
+    };
+    #pragma keylist Presence hostname
+};
