@@ -14,4 +14,4 @@ BUILT_SOURCES = $(pidfiles)
 
 userqos_LDFLAGS = -L$(OSPL_HOME)/lib -lddsdatabase -ldcpsgapi -ldcpssacpp -lddsos
 userqos_CPPFLAGS = -I$(OSPL_HOME)/include/dcps/C++/SACPP -I$(OSPL_HOME)/include/ -I$(OSPL_HOME)/include/sys -Ibuilt
-userqos_SOURCES = src/userqos.cpp src/userqos/reader.cpp src/userqos/writer.cpp
+userqos_SOURCES = $(pidfiles) src/userqos.cpp src/userqos/reader.cpp src/userqos/writer.cpp
