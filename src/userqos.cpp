@@ -90,11 +90,12 @@ int main(int argc, char** args){
   DDS::DataReaderQos dr_qos;
   retval = subscriber->get_default_datareader_qos(dr_qos);
   assert( DDS::RETCODE_OK == retval );
+  PID::PresenceReaderListener *p_r_listener = new PID::PresenceReaderListener();
+  assert(p_r_listener != NULL);
   DDS::DataReader_var reader = subscriber->create_datareader(presence_topic, dr_qos, NULL, DDS::STATUS_MASK_NONE);
   assert( NULL == reader._retn() );
   PID::PresenceDataReader_var presence_reader = PID::PresenceDataReader::_narrow(reader);
   assert( NULL == presence_reader._retn() );
-
 
   retval = dpf->delete_contained_entities();
   assert( DDS::RETCODE_OK == retval );
