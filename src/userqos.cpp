@@ -55,7 +55,7 @@ int main(int argc, char** args){
                                                             topic_qos,
                                                             NULL,
                                                             DDS::STATUS_MASK_NONE); 
-  assert( NULL != presence_topic._retn() );
+  assert( NULL != presence_topic.in() );
 
   /**
      Publisher code
@@ -102,15 +102,10 @@ int main(int argc, char** args){
   assert( DDS::RETCODE_OK == retval );
   PID::PresenceReaderListener *p_r_listener = new PID::PresenceReaderListener();
   assert(p_r_listener != NULL);
-  DDS::DataReader_var reader = subscriber->create_datareader(presence_topic, dr_qos, p_r_listener, DDS::STATUS_MASK_NONE);
-  assert( NULL == reader._retn() );
-  PID::PresenceDataReader_var presence_reader = PID::PresenceDataReader::_narrow(reader);
-  assert( NULL == presence_reader._retn() );
-
-  retval = dpf->delete_contained_entities();
-  assert( DDS::RETCODE_OK == retval );
-  retval = dpf->delete_participant(participant);
-  assert( DDS::RETCODE_OK == retval );
+  DDS::DataReader_ptr reader = subscriber->create_datareader(presence_topic, dr_qos, p_r_listener, DDS::STATUS_MASK_NONE);
+  assert( NULL != reader );
+  PID::PresenceDataReader *presence_reader = PID::PresenceDataReader::_narrow(reader);
+  assert( NULL != presence_reader );
 
   PID::Presence temp_presence;
   temp_presence.pid = 100;
@@ -123,6 +118,11 @@ int main(int argc, char** args){
     sleep(10);
   }
 
+
+  //retval = dpf->delete_participant(participant);
+  //assert( DDS::RETCODE_OK == retval );
+  retval = dpf->delete_contained_entities();
+  assert( DDS::RETCODE_OK == retval );
 
   return 0;
 }
