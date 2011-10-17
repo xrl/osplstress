@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <stdlib.h>
 #include <assert.h>
 
@@ -13,11 +15,15 @@
   _ptr : You do all the work
 **/
 
+int shutdown_flag = 0;
+
 int main(int argc, char** args){
+  std::cout << "Welcome to userqos stress test" << std::endl;
   DDS::ReturnCode_t retval;
+  DDS::InstanceHandle_t handle;
   // DomainParticipantFactory_var dpf = DDS::DomainParticipantFactory::get_instance();
-  DDS::DomainParticipantFactory_var dpf = DDS::DomainParticipantFactory::get_instance();
-  assert( NULL != dpf._retn());
+  DDS::DomainParticipantFactory_ptr dpf = DDS::DomainParticipantFactory::get_instance();
+  assert( NULL != dpf);
   //            DomainParticipant_var participant;
   DDS::DomainParticipant_var participant = dpf->create_participant(NULL,
                                                                    PARTICIPANT_QOS_DEFAULT,
@@ -92,7 +98,7 @@ int main(int argc, char** args){
   assert( DDS::RETCODE_OK == retval );
   PID::PresenceReaderListener *p_r_listener = new PID::PresenceReaderListener();
   assert(p_r_listener != NULL);
-  DDS::DataReader_var reader = subscriber->create_datareader(presence_topic, dr_qos, NULL, DDS::STATUS_MASK_NONE);
+  DDS::DataReader_var reader = subscriber->create_datareader(presence_topic, dr_qos, p_r_listener, DDS::STATUS_MASK_NONE);
   assert( NULL == reader._retn() );
   PID::PresenceDataReader_var presence_reader = PID::PresenceDataReader::_narrow(reader);
   assert( NULL == presence_reader._retn() );
@@ -101,5 +107,18 @@ int main(int argc, char** args){
   assert( DDS::RETCODE_OK == retval );
   retval = dpf->delete_participant(participant);
   assert( DDS::RETCODE_OK == retval );
+
+  PID::Presence temp_presence;
+  temp_presence.pid = 100;
+  temp_presence.hostname = "my_machine";
+  handle = presence_writer->register_instance(temp_presence);
+  assert( DDS::HANDLE_NIL != handle );
+
+  std::cout << "LOOPING" << std::endl;
+  while(shutdown_flag == 0){
+    sleep(10);
+  }
+
+
   return 0;
 }
