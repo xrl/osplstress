@@ -1,9 +1,8 @@
 #include <ccpp_dds_dcps.h>
-
 #include <idl/ccpp_PID.h>
 
 namespace PID{
-    class PresenceReaderListener : DDS::DataReaderListener{
+    class PresenceReaderListener : public DDS::DataReaderListener{
         public:
             void on_requested_deadline_missed(DDS::DataReader_ptr reader, const DDS::RequestedDeadlineMissedStatus& status);
             void on_requested_incompatible_qos(DDS::DataReader_ptr reader, const DDS::RequestedIncompatibleQosStatus& status);
@@ -13,4 +12,4 @@ namespace PID{
             void on_subscription_matched(DDS::DataReader_ptr reader, const DDS::SubscriptionMatchedStatus& status);
             void on_sample_lost(DDS::DataReader_ptr reader, const DDS::SampleLostStatus& status);
     };
-};
+}

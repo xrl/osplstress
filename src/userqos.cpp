@@ -21,16 +21,19 @@ int main(int argc, char** args){
   std::cout << "Welcome to userqos stress test" << std::endl;
   DDS::ReturnCode_t retval;
   DDS::InstanceHandle_t handle;
-  // DomainParticipantFactory_var dpf = DDS::DomainParticipantFactory::get_instance();
+  
   DDS::DomainParticipantFactory_ptr dpf = DDS::DomainParticipantFactory::get_instance();
   assert( NULL != dpf);
-  //            DomainParticipant_var participant;
-  DDS::DomainParticipant_var participant = dpf->create_participant(NULL,
+
+  DDS::DomainParticipantQos participant_qos;
+  retval = dpf->get_default_participant_qos(participant_qos);
+  assert( DDS::RETCODE_OK == retval );
+  DDS::DomainId_t domain = NULL;
+  DDS::DomainParticipant_var participant = dpf->create_participant(domain,
                                                                    PARTICIPANT_QOS_DEFAULT,
                                                                    NULL,
                                                                    DDS::STATUS_MASK_NONE);
-  assert( NULL == participant );
-  assert( NULL != participant._retn() );
+  assert( NULL != participant.in() );
 
   /**
     Magical key definitions. If you want the idlpp to generate TypeSupport you MUST,
@@ -43,7 +46,7 @@ int main(int argc, char** args){
   retval = pid_ts->register_type(participant, pid_ts->get_type_name());
   assert ( DDS::RETCODE_OK == retval );
 
-  DDS::TopicQos_var topic_qos;
+  DDS::TopicQos topic_qos;
   retval = participant->get_default_topic_qos(topic_qos);
   assert( DDS::RETCODE_OK == retval );
 
@@ -63,21 +66,22 @@ int main(int argc, char** args){
   DDS::Publisher_var publisher = participant->create_publisher(publisher_qos,
                                                                NULL,
                                                                DDS::STATUS_MASK_NONE);
-  assert( NULL != publisher._retn() );
+  assert( NULL != publisher.in() );
 
   /**
     PID Data Writer
   **/
   DDS::DataWriterQos dw_qos;
-  publisher->get_default_datawriter_qos(dw_qos);
-  const char* msg = "HI THERE COWBOY\n";
-  dw_qos.user_data.value = DDS_DCPSUFLSeq<unsigned char, DDS::octSeq_uniq_>(msg);
-  assert( strlen(msg) == dw_qos.user_data.value.length() );
+  retval = publisher->get_default_datawriter_qos(dw_qos);
+  assert( DDS::RETCODE_OK == retval );
+  //const char* msg = "HI THERE COWBOY\n";
+  //dw_qos.user_data.value = DDS_DCPSUFLSeq<unsigned char, DDS::octSeq_uniq_>(msg);
+  //assert( strlen(msg) == dw_qos.user_data.value.length() );
   
   DDS::DataWriter_var writer = publisher->create_datawriter(presence_topic, dw_qos, NULL, DDS::STATUS_MASK_NONE); 
-  assert( NULL != writer._retn() );
+  assert( NULL != writer.in() );
   PID::PresenceDataWriter_var presence_writer = PID::PresenceDataWriter::_narrow(writer);
-  assert( NULL != presence_writer._retn() );
+  assert( NULL != presence_writer.in() );
 
   /**
     Subscriber
@@ -88,7 +92,7 @@ int main(int argc, char** args){
   DDS::Subscriber_var subscriber = participant->create_subscriber(subscriber_qos,
                                                                   NULL,
                                                                   DDS::STATUS_MASK_NONE);
-  assert( NULL != subscriber._retn() );
+  assert( NULL != subscriber.in() );
 
   /**
     PID Data Reader
