@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include <ccpp_dds_dcps.h>
 
@@ -47,7 +48,9 @@ namespace PID{
                     // std::cout << "Done getting pubdata" << std::endl;
 
                     DDS::UserDataQosPolicy user_data = pubdata.user_data;
-                    printf("%.*s", user_data.value.length(), user_data.value.get_buffer() );
+                    // This string constructor uses the length -- so no \0 necessary?
+                    std::string tempstr = std::string(reinterpret_cast<const char*>(user_data.value.get_buffer()),user_data.value.length());
+                    std::cout << tempstr << std::endl;
 
                     assert( DDS::RETCODE_OK == retval );
                 }
