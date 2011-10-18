@@ -74,9 +74,9 @@ int main(int argc, char** args){
   DDS::DataWriterQos dw_qos;
   retval = publisher->get_default_datawriter_qos(dw_qos);
   assert( DDS::RETCODE_OK == retval );
-  //const char* msg = "HI THERE COWBOY\n";
-  //dw_qos.user_data.value = DDS_DCPSUFLSeq<unsigned char, DDS::octSeq_uniq_>(msg);
-  //assert( strlen(msg) == dw_qos.user_data.value.length() );
+  const char* msg = "HI THERE COWBOY\n";
+  dw_qos.user_data.value = DDS_DCPSUFLSeq<unsigned char, DDS::octSeq_uniq_>(msg);
+  assert( strlen(msg) == dw_qos.user_data.value.length() );
   
   DDS::DataWriter_var writer = publisher->create_datawriter(presence_topic, dw_qos, NULL, DDS::STATUS_MASK_NONE); 
   assert( NULL != writer.in() );

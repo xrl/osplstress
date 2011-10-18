@@ -23,16 +23,33 @@ namespace PID{
                 PresenceDataReader_ptr preader = PresenceDataReader::_narrow(reader);
                 assert(preader != NULL);
 
+                DDS::ReturnCode_t retval;
                 DDS::SampleInfoSeq infoseq;
                 PresenceSeq pseq;
-                preader->take(pseq,
-                              infoseq,
-                              DDS::LENGTH_UNLIMITED,
-                              DDS::NOT_READ_SAMPLE_STATE,
-                              DDS::ANY_INSTANCE_STATE,
-                              DDS::ALIVE_INSTANCE_STATE);
+                retval =preader->take(pseq,
+                                      infoseq,
+                                      DDS::LENGTH_UNLIMITED,
+                                      DDS::NOT_READ_SAMPLE_STATE,
+                                      DDS::ANY_INSTANCE_STATE,
+                                      DDS::ALIVE_INSTANCE_STATE);
+                assert( DDS::RETCODE_OK == retval );
+
+                DDS::InstanceHandle_t pubhandle;
+                // If I turn this in to a _var the get_matched_publication_data never returns
+                DDS::PublicationBuiltinTopicData pubdata;
                 if( pseq.length() > 0){
                     std::cout << "On data available" << std::endl;
+                    pubhandle = infoseq[0].publication_handle;
+                    assert( pubhandle != DDS::HANDLE_NIL );
+                    // Do we want the narrowed reader?
+                    // std::cout << "Getting the pubdata" << std::endl;
+                    retval = reader->get_matched_publication_data(pubdata,pubhandle);
+                    // std::cout << "Done getting pubdata" << std::endl;
+
+                    DDS::UserDataQosPolicy user_data = pubdata.user_data;
+                    printf("%.*s", user_data.value.length(), user_data.value.get_buffer() );
+
+                    assert( DDS::RETCODE_OK == retval );
                 }
             }
             void PresenceReaderListener::on_subscription_matched(DDS::DataReader_ptr reader, const DDS::SubscriptionMatchedStatus& status){
