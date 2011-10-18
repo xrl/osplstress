@@ -1,6 +1,6 @@
 # -pedantic
 CXX=clang++
-AM_CXXFLAGS = -g -O0 -Wall -Werror
+AM_CXXFLAGS = -g -Wall -Werror
 
 bin_PROGRAMS = userqos
 
