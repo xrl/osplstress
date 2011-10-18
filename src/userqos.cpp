@@ -117,7 +117,7 @@ int main(int argc, char** args){
   while(shutdown_flag == 0){
     retval = presence_writer->write(temp_presence,handle);
     assert( DDS::RETCODE_OK == retval );
-    sleep(1);
+    //sleep(1);
   }
 
 

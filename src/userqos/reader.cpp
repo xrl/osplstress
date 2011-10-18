@@ -49,6 +49,7 @@ namespace PID{
 
                     DDS::UserDataQosPolicy user_data = pubdata.user_data;
                     // This string constructor uses the length -- so no \0 necessary?
+                    assert(user_data.value.length() > 0);
                     std::string tempstr = std::string(reinterpret_cast<const char*>(user_data.value.get_buffer()),user_data.value.length());
                     std::cout << tempstr << std::endl;
 
