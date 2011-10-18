@@ -102,7 +102,7 @@ int main(int argc, char** args){
   assert( DDS::RETCODE_OK == retval );
   PID::PresenceReaderListener *p_r_listener = new PID::PresenceReaderListener();
   assert(p_r_listener != NULL);
-  DDS::DataReader_ptr reader = subscriber->create_datareader(presence_topic, dr_qos, p_r_listener, DDS::STATUS_MASK_NONE);
+  DDS::DataReader_ptr reader = subscriber->create_datareader(presence_topic, dr_qos, p_r_listener, DDS::DATA_AVAILABLE_STATUS);
   assert( NULL != reader );
   PID::PresenceDataReader *presence_reader = PID::PresenceDataReader::_narrow(reader);
   assert( NULL != presence_reader );
@@ -115,7 +115,9 @@ int main(int argc, char** args){
 
   std::cout << "LOOPING" << std::endl;
   while(shutdown_flag == 0){
-    sleep(10);
+    retval = presence_writer->write(temp_presence,handle);
+    assert( DDS::RETCODE_OK == retval );
+    sleep(1);
   }
 
 

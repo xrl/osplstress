@@ -20,7 +20,20 @@ namespace PID{
                 std::cout << "On liveliness changed" << std::endl;
             }
             void PresenceReaderListener::on_data_available(DDS::DataReader_ptr reader){
-                std::cout << "On data available" << std::endl;
+                PresenceDataReader_ptr preader = PresenceDataReader::_narrow(reader);
+                assert(preader != NULL);
+
+                DDS::SampleInfoSeq infoseq;
+                PresenceSeq pseq;
+                preader->take(pseq,
+                              infoseq,
+                              DDS::LENGTH_UNLIMITED,
+                              DDS::NOT_READ_SAMPLE_STATE,
+                              DDS::ANY_INSTANCE_STATE,
+                              DDS::ALIVE_INSTANCE_STATE);
+                if( pseq.length() > 0){
+                    std::cout << "On data available" << std::endl;
+                }
             }
             void PresenceReaderListener::on_subscription_matched(DDS::DataReader_ptr reader, const DDS::SubscriptionMatchedStatus& status){
                 std::cout << "On subscribtion matched" << std::endl;
