@@ -7,6 +7,8 @@
 
 #include "reader.h"
 
+extern int shutdown_flag;
+
 namespace PID{
             void PresenceReaderListener::on_requested_deadline_missed(DDS::DataReader_ptr reader, const DDS::RequestedDeadlineMissedStatus& status){
                 std::cout << "On requested deadline missed" << std::endl;
@@ -33,7 +35,11 @@ namespace PID{
                                       DDS::NOT_READ_SAMPLE_STATE,
                                       DDS::ANY_INSTANCE_STATE,
                                       DDS::ALIVE_INSTANCE_STATE);
-                assert( DDS::RETCODE_OK == retval );
+                if( DDS::RETCODE_OK != retval ){
+                    // This used to be an assert to fail. But now I'm thinking
+                    // this could just be a timing issue that we need to handle normally.
+                    return;
+                }
 
                 DDS::InstanceHandle_t pubhandle;
                 // If I turn this in to a _var the get_matched_publication_data never returns
@@ -55,6 +61,7 @@ namespace PID{
 
                     assert( DDS::RETCODE_OK == retval );
                 }
+                shutdown_flag = 1;
             }
             void PresenceReaderListener::on_subscription_matched(DDS::DataReader_ptr reader, const DDS::SubscriptionMatchedStatus& status){
                 std::cout << "On subscribtion matched" << std::endl;

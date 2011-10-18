@@ -19,6 +19,21 @@ int shutdown_flag = 0;
 
 int main(int argc, char** args){
   std::cout << "Welcome to userqos stress test" << std::endl;
+  enum {PUBLISHER, SUBSCRIBER} mode;
+  if(argc != 2 || !(*args[1] == 'p' || *args[1] == 's')){
+      printf("Usage: %s (p|s)\n"
+             " p - Publisher\n"
+             " s - Subscriber\n",args[0]);
+      exit(EXIT_FAILURE);
+  } else if(*args[1] == 'p'){
+      mode = PUBLISHER;
+  } else if(*args[1] == 's'){
+      mode = SUBSCRIBER;
+  } else {
+      printf("Should never reach this state.\n");
+      exit(EXIT_FAILURE);
+  }
+
   DDS::ReturnCode_t retval;
   DDS::InstanceHandle_t handle;
   
@@ -60,71 +75,77 @@ int main(int argc, char** args){
   /**
      Publisher code
   **/
-  DDS::PublisherQos publisher_qos;
-  retval = participant->get_default_publisher_qos(publisher_qos);
-  assert( DDS::RETCODE_OK == retval );
-  DDS::Publisher_var publisher = participant->create_publisher(publisher_qos,
-                                                               NULL,
-                                                               DDS::STATUS_MASK_NONE);
-  assert( NULL != publisher.in() );
+  if(mode == PUBLISHER){
+      DDS::PublisherQos publisher_qos;
+      retval = participant->get_default_publisher_qos(publisher_qos);
+      assert( DDS::RETCODE_OK == retval );
+      DDS::Publisher_var publisher = participant->create_publisher(publisher_qos,
+                                                                   NULL,
+                                                                   DDS::STATUS_MASK_NONE);
+      assert( NULL != publisher.in() );
 
-  /**
-    PID Data Writer
-  **/
-  DDS::DataWriterQos dw_qos;
-  retval = publisher->get_default_datawriter_qos(dw_qos);
-  assert( DDS::RETCODE_OK == retval );
-  const char* msg = "HI THERE COWBOY";
-  dw_qos.user_data.value = DDS_DCPSUFLSeq<unsigned char, DDS::octSeq_uniq_>(msg);
-  assert( strlen(msg) == dw_qos.user_data.value.length() );
-  
-  DDS::DataWriter_var writer = publisher->create_datawriter(presence_topic, dw_qos, NULL, DDS::STATUS_MASK_NONE); 
-  assert( NULL != writer.in() );
-  PID::PresenceDataWriter_var presence_writer = PID::PresenceDataWriter::_narrow(writer);
-  assert( NULL != presence_writer.in() );
+      /**
+        PID Data Writer
+      **/
+      DDS::DataWriterQos dw_qos;
+      retval = publisher->get_default_datawriter_qos(dw_qos);
+      assert( DDS::RETCODE_OK == retval );
+      const char* msg = "HI THERE COWBOY";
+      dw_qos.user_data.value = DDS_DCPSUFLSeq<unsigned char, DDS::octSeq_uniq_>(msg);
+      assert( strlen(msg) == dw_qos.user_data.value.length() );
+      
+      DDS::DataWriter_var writer = publisher->create_datawriter(presence_topic, dw_qos, NULL, DDS::STATUS_MASK_NONE); 
+      assert( NULL != writer.in() );
+      PID::PresenceDataWriter_var presence_writer = PID::PresenceDataWriter::_narrow(writer);
+      assert( NULL != presence_writer.in() );
 
+      PID::Presence temp_presence;
+      temp_presence.pid = 100;
+      temp_presence.hostname = "my_machine";
+      handle = presence_writer->register_instance(temp_presence);
+      assert( DDS::HANDLE_NIL != handle );
+
+      std::cout << "LOOPING" << std::endl;
+      while(shutdown_flag == 0){
+        retval = presence_writer->write(temp_presence,handle);
+        assert( DDS::RETCODE_OK == retval );
+        usleep(50);
+      }
+  }
   /**
     Subscriber
   **/
-  DDS::SubscriberQos subscriber_qos;
-  retval = participant->get_default_subscriber_qos(subscriber_qos);
-  assert( DDS::RETCODE_OK == retval );
-  DDS::Subscriber_var subscriber = participant->create_subscriber(subscriber_qos,
-                                                                  NULL,
-                                                                  DDS::STATUS_MASK_NONE);
-  assert( NULL != subscriber.in() );
+  else if(mode == SUBSCRIBER){
+      DDS::SubscriberQos subscriber_qos;
+      retval = participant->get_default_subscriber_qos(subscriber_qos);
+      assert( DDS::RETCODE_OK == retval );
+      DDS::Subscriber_var subscriber = participant->create_subscriber(subscriber_qos,
+                                                                      NULL,
+                                                                      DDS::STATUS_MASK_NONE);
+      assert( NULL != subscriber.in() );
 
-  /**
-    PID Data Reader
-  **/
-  DDS::DataReaderQos dr_qos;
-  retval = subscriber->get_default_datareader_qos(dr_qos);
-  assert( DDS::RETCODE_OK == retval );
-  PID::PresenceReaderListener *p_r_listener = new PID::PresenceReaderListener();
-  assert(p_r_listener != NULL);
-  DDS::DataReader_ptr reader = subscriber->create_datareader(presence_topic, dr_qos, p_r_listener, DDS::DATA_AVAILABLE_STATUS);
-  assert( NULL != reader );
-  PID::PresenceDataReader *presence_reader = PID::PresenceDataReader::_narrow(reader);
-  assert( NULL != presence_reader );
+      /**
+        PID Data Reader
+      **/
+      DDS::DataReaderQos dr_qos;
+      retval = subscriber->get_default_datareader_qos(dr_qos);
+      assert( DDS::RETCODE_OK == retval );
+      PID::PresenceReaderListener *p_r_listener = new PID::PresenceReaderListener();
+      assert(p_r_listener != NULL);
+      DDS::DataReader_ptr reader = subscriber->create_datareader(presence_topic, dr_qos, p_r_listener, DDS::DATA_AVAILABLE_STATUS);
+      assert( NULL != reader );
+      PID::PresenceDataReader *presence_reader = PID::PresenceDataReader::_narrow(reader);
+      assert( NULL != presence_reader );
 
-  PID::Presence temp_presence;
-  temp_presence.pid = 100;
-  temp_presence.hostname = "my_machine";
-  handle = presence_writer->register_instance(temp_presence);
-  assert( DDS::HANDLE_NIL != handle );
-
-  std::cout << "LOOPING" << std::endl;
-  while(shutdown_flag == 0){
-    retval = presence_writer->write(temp_presence,handle);
-    assert( DDS::RETCODE_OK == retval );
-    //sleep(1);
+      while(shutdown_flag == 0){
+        usleep(50);
+      }
   }
-
 
   //retval = dpf->delete_participant(participant);
   //assert( DDS::RETCODE_OK == retval );
   retval = dpf->delete_contained_entities();
-  assert( DDS::RETCODE_OK == retval );
+  // assert( DDS::RETCODE_OK == retval );
 
   return 0;
 }
