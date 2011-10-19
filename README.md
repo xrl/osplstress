@@ -7,10 +7,8 @@ First, build the code:
   ./configure
   make
 
-Existing test tools
-
-  userqot: causes denial of service, crashing the ospl daemon and locking the DDS application. Must hard-kill application, ospl stop && ospl start
-  in one terminal: ./userqot p
-  in another:      for i in {1..10000}; do ./userqos s; done
-
-  After a while it will fall over, always less than 2 minutes.
+Recreate UserQosPolicy is empty error
+  In one terminal you will run a publisher, a short-lived process
+    ./userqos p
+  In another terminal you will run a subscriber, a long-lived process
+    ./userqos s
