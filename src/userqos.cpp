@@ -102,15 +102,16 @@ int main(int argc, char** args){
       PID::Presence temp_presence;
       temp_presence.pid = 100;
       temp_presence.hostname = "my_machine";
-      handle = presence_writer->register_instance(temp_presence);
-      assert( DDS::HANDLE_NIL != handle );
+      //handle = presence_writer->register_instance(temp_presence);
+      //assert( DDS::HANDLE_NIL != handle );
+      handle = DDS::HANDLE_NIL;
 
-      std::cout << "LOOPING" << std::endl;
-      while(shutdown_flag == 0){
+      // std::cout << "LOOPING" << std::endl;
+      // while(shutdown_flag == 0){
         retval = presence_writer->write(temp_presence,handle);
         assert( DDS::RETCODE_OK == retval );
-        usleep(50);
-      }
+      //  usleep(50);
+      //}
   }
   /**
     Subscriber
@@ -144,8 +145,30 @@ int main(int argc, char** args){
 
   //retval = dpf->delete_participant(participant);
   //assert( DDS::RETCODE_OK == retval );
-  retval = dpf->delete_contained_entities();
-  // assert( DDS::RETCODE_OK == retval );
+  retval = DDS::RETCODE_PRECONDITION_NOT_MET;
+  while(retval != DDS::RETCODE_OK){
+      retval = dpf->delete_contained_entities();
+      /*
+      switch(retval){
+        case DDS::RETCODE_OK:
+            printf("DDS::RETCODE_OK\n");
+            break;
+        case DDS::RETCODE_ERROR:
+            printf("DDS::RETCODE_ERROR\n");
+            break;
+        case DDS::RETCODE_OUT_OF_RESOURCES:
+            printf("DDS::RETCODE_OUT_OF_RESOURCES\n");
+            break;
+        case DDS::RETCODE_PRECONDITION_NOT_MET:
+            printf("DDS::RETCODE_PRECONDITION_NOT_MET\n");
+            break;
+        default:
+            printf("Default case?\n");
+      }
+      */
+      usleep(10);
+  }
+  assert( DDS::RETCODE_OK == retval );
 
   return 0;
 }

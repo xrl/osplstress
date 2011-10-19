@@ -61,7 +61,7 @@ namespace PID{
 
                     assert( DDS::RETCODE_OK == retval );
                 }
-                shutdown_flag = 1;
+                //shutdown_flag = 1;
             }
             void PresenceReaderListener::on_subscription_matched(DDS::DataReader_ptr reader, const DDS::SubscriptionMatchedStatus& status){
                 std::cout << "On subscribtion matched" << std::endl;
